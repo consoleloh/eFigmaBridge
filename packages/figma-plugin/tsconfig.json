@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["ES2017"],
+    "strict": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "types": ["@figma/plugin-typings"],
+    "paths": {
+      "@figmabridge/shared": ["../shared/src/index.ts"]
+    }
+  },
+  "include": ["src/main.ts", "src/handlers/*.ts"],
+  "exclude": ["src/ui.ts"]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@figmabridge/figma-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs --watch"
+  },
+  "dependencies": {
+    "@figmabridge/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.129.0",
+    "esbuild": "^0.28.1",
+    "typescript": "^5.8.3"
+  }
+}

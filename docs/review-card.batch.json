@@ -1,0 +1,195 @@
+{
+  "comment": "Карточка отзыва на Auto Layout. Запуск: run_batch { file: \"<абсолютный путь>/docs/review-card.batch.json\" }. Подставьте id своей страницы вместо 0:1 в шаге 7 (обычно это текущая страница). Placeholder $имя подставляется целиком из saves предыдущих шагов.",
+  "ops": [
+    {
+      "step": 1,
+      "tool": "create_variable_collection",
+      "label": "Коллекция UI/Review Card",
+      "args": { "name": "UI/Review Card", "modes": ["Light"] },
+      "saves": { "$collection": "id", "$mode": "modes[0].id" }
+    },
+    {
+      "step": 2,
+      "tool": "create_variable",
+      "label": "Background",
+      "args": { "collectionId": "$collection", "name": "Background", "type": "COLOR", "values": { "$mode": "#FFFFFF" } },
+      "saves": { "$vBackground": "id" }
+    },
+    {
+      "step": 3,
+      "tool": "create_variable",
+      "label": "Border",
+      "args": { "collectionId": "$collection", "name": "Border", "type": "COLOR", "values": { "$mode": "#E5E7EB" } },
+      "saves": { "$vBorder": "id" }
+    },
+    {
+      "step": 4,
+      "tool": "create_variable",
+      "label": "Avatar",
+      "args": { "collectionId": "$collection", "name": "Avatar", "type": "COLOR", "values": { "$mode": "#D1D5DB" } },
+      "saves": { "$vAvatar": "id" }
+    },
+    {
+      "step": 5,
+      "tool": "create_variable",
+      "label": "Star",
+      "args": { "collectionId": "$collection", "name": "Star", "type": "COLOR", "values": { "$mode": "#F59E0B" } },
+      "saves": { "$vStar": "id" }
+    },
+    {
+      "step": 6,
+      "tool": "create_variable",
+      "label": "Text colors",
+      "args": { "collectionId": "$collection", "name": "Text/Primary", "type": "COLOR", "values": { "$mode": "#111827" } },
+      "saves": { "$vPrimary": "id" }
+    },
+    {
+      "step": 7,
+      "tool": "create_variable",
+      "label": "Text secondary",
+      "args": { "collectionId": "$collection", "name": "Text/Secondary", "type": "COLOR", "values": { "$mode": "#6B7280" } },
+      "saves": { "$vSecondary": "id" }
+    },
+    {
+      "step": 8,
+      "tool": "create_frame",
+      "label": "Карточка",
+      "args": {
+        "parentId": "0:1",
+        "name": "Review Card",
+        "layout": { "direction": "VERTICAL", "itemSpacing": 16, "padding": 20 },
+        "fills": [{ "type": "SOLID", "color": { "variableId": "$vBackground" } }],
+        "strokes": [{ "type": "SOLID", "color": { "variableId": "$vBorder" } }],
+        "strokeWeight": 1,
+        "cornerRadius": 16
+      },
+      "saves": { "$card": "id" }
+    },
+    {
+      "step": 9,
+      "tool": "create_frame",
+      "label": "Шапка",
+      "args": {
+        "parentId": "$card",
+        "name": "Header",
+        "layout": { "direction": "HORIZONTAL", "itemSpacing": 12, "counterAxisAlignItems": "CENTER" }
+      },
+      "saves": { "$header": "id" }
+    },
+    {
+      "step": 10,
+      "tool": "set_node_layout_child",
+      "label": "Шапка на всю ширину",
+      "args": { "id": "$header", "layoutAlign": "STRETCH" }
+    },
+    {
+      "step": 11,
+      "tool": "create_ellipse",
+      "label": "Аватар",
+      "args": {
+        "parentId": "$header",
+        "name": "Avatar",
+        "width": 48,
+        "height": 48,
+        "fills": [{ "type": "SOLID", "color": { "variableId": "$vAvatar" } }]
+      }
+    },
+    {
+      "step": 12,
+      "tool": "create_frame",
+      "label": "Имя + дата",
+      "args": {
+        "parentId": "$header",
+        "name": "Name + date",
+        "layout": { "direction": "VERTICAL", "itemSpacing": 2 }
+      },
+      "saves": { "$meta": "id" }
+    },
+    {
+      "step": 13,
+      "tool": "create_text",
+      "label": "Имя",
+      "args": { "parentId": "$meta", "name": "Name", "text": "Анна Смирнова" },
+      "saves": { "$name": "id" }
+    },
+    {
+      "step": 14,
+      "tool": "bind_node_variable",
+      "label": "Цвет имени",
+      "args": { "id": "$name", "field": "fills", "variableId": "$vPrimary" }
+    },
+    {
+      "step": 15,
+      "tool": "create_text",
+      "label": "Дата",
+      "args": { "parentId": "$meta", "name": "Date", "text": "12 ноября 2026" },
+      "saves": { "$date": "id" }
+    },
+    {
+      "step": 16,
+      "tool": "bind_node_variable",
+      "label": "Цвет даты",
+      "args": { "id": "$date", "field": "fills", "variableId": "$vSecondary" }
+    },
+    {
+      "step": 17,
+      "tool": "create_frame",
+      "label": "Рейтинг",
+      "args": {
+        "parentId": "$card",
+        "name": "Rating",
+        "layout": { "direction": "HORIZONTAL", "itemSpacing": 4 }
+      },
+      "saves": { "$rating": "id" }
+    },
+    {
+      "step": 18,
+      "tool": "create_rectangle",
+      "label": "Звезда 1",
+      "args": { "parentId": "$rating", "name": "Star 1", "width": 18, "height": 18, "cornerRadius": 4, "fills": [{ "type": "SOLID", "color": { "variableId": "$vStar" } }] }
+    },
+    {
+      "step": 19,
+      "tool": "create_rectangle",
+      "label": "Звезда 2",
+      "args": { "parentId": "$rating", "name": "Star 2", "width": 18, "height": 18, "cornerRadius": 4, "fills": [{ "type": "SOLID", "color": { "variableId": "$vStar" } }] }
+    },
+    {
+      "step": 20,
+      "tool": "create_rectangle",
+      "label": "Звезда 3",
+      "args": { "parentId": "$rating", "name": "Star 3", "width": 18, "height": 18, "cornerRadius": 4, "fills": [{ "type": "SOLID", "color": { "variableId": "$vStar" } }] }
+    },
+    {
+      "step": 21,
+      "tool": "create_rectangle",
+      "label": "Звезда 4",
+      "args": { "parentId": "$rating", "name": "Star 4", "width": 18, "height": 18, "cornerRadius": 4, "fills": [{ "type": "SOLID", "color": { "variableId": "$vStar" } }] }
+    },
+    {
+      "step": 22,
+      "tool": "create_rectangle",
+      "label": "Звезда 5",
+      "args": { "parentId": "$rating", "name": "Star 5", "width": 18, "height": 18, "cornerRadius": 4, "fills": [{ "type": "SOLID", "color": { "variableId": "$vStar" } }] }
+    },
+    {
+      "step": 23,
+      "tool": "create_text",
+      "label": "Текст отзыва",
+      "args": { "parentId": "$card", "name": "Review text", "text": "Отличный сервис! Всё пришло вовремя, качество выше ожиданий. Рекомендую." },
+      "saves": { "$review": "id" }
+    },
+    {
+      "step": 24,
+      "tool": "bind_node_variable",
+      "label": "Цвет текста отзыва",
+      "args": { "id": "$review", "field": "fills", "variableId": "$vPrimary" }
+    },
+    {
+      "step": 25,
+      "tool": "set_node_layout_child",
+      "label": "Текст на всю ширину",
+      "args": { "id": "$review", "layoutAlign": "STRETCH" }
+    }
+  ]
+}

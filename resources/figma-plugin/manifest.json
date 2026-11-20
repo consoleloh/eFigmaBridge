@@ -1,0 +1,17 @@
+{
+  "name": "FrontMultitool Bridge",
+  "id": "frontmultitool-bridge-dev",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "ui": "dist/ui.html",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["none"],
+    "devAllowedDomains": [
+      "ws://localhost:9323",
+      "ws://localhost:9324",
+      "ws://localhost:9325"
+    ]
+  }
+}

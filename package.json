@@ -1,0 +1,71 @@
+{
+  "name": "efigmabridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Десктопный мост между LLM (MCP) и Figma",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "build": "vite build",
+    "start": "node scripts/start.mjs",
+    "dev": "npm run build && node scripts/start.mjs",
+    "dist": "npm run build && node scripts/dist.mjs"
+  },
+  "build": {
+    "appId": "com.efigmabridge.app",
+    "productName": "eFigmaBridge",
+    "electronDist": "node_modules/electron/dist",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron/**",
+      "renderer/dist/**",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "adapter",
+        "to": "adapter"
+      },
+      {
+        "from": "resources/figma-plugin",
+        "to": "figma-plugin"
+      }
+    ],
+    "win": {
+      "target": [
+        "portable"
+      ]
+    },
+    "portable": {
+      "artifactName": "eFigmaBridge-${version}-portable.exe"
+    },
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": [
+        "zip",
+        "dmg"
+      ]
+    },
+    "dmg": {
+      "artifactName": "eFigmaBridge-${version}-macOS-arm64.dmg"
+    }
+  },
+  "dependencies": {
+    "ws": "^8.21.0"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.142.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "autoprefixer": "^10.4.20",
+    "electron": "^33.2.1",
+    "electron-builder": "^26.18.0",
+    "esbuild": "^0.28.2",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^7.0.2",
+    "vite": "^6.0.5",
+    "vue": "^3.5.13"
+  }
+}

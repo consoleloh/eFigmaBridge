@@ -1,0 +1,59 @@
+name: build
+
+# Сборка обеих версий: Windows (portable exe) и macOS (zip + dmg, arm64).
+# macOS-пакет можно собрать только на macOS-раннере — подпись Apple не кроссплатформенна.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: win
+            artifact: eFigmaBridge-windows-x64
+          - os: macos-latest
+            target: mac
+            artifact: eFigmaBridge-macos-arm64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Figma plugin
+        run: |
+          node build.mjs
+          cp -r dist/* ../../resources/figma-plugin/dist/
+        working-directory: packages/figma-plugin
+
+      - name: Build renderer
+        run: npm run build
+
+      - name: Package app
+        run: node scripts/dist.mjs
+        env:
+          DIST_TARGET: ${{ matrix.target }}
+          DIST_OUTPUT: release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: |
+            release/*.exe
+            release/*.zip
+            release/*.dmg
+          if-no-files-found: error

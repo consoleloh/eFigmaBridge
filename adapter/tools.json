@@ -1,0 +1,3779 @@
+[
+  {
+    "name": "add_variable_mode",
+    "title": "Add variable mode",
+    "description": "Adds a mode to a local variable collection. Returns { modeId, collection } with the collection as in get_variable_collections. NOT_FOUND for an unknown collection; INVALID_ARGUMENT if the mode name is taken in this collection.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "collectionId": {
+          "type": "string",
+          "description": "Collection id"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Mode name"
+        }
+      },
+      "required": [
+        "collectionId",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "create_annotation_category",
+    "title": "Create annotation category",
+    "description": "Adds an annotation category to the file. Returns { id, label, color, isPreset }. INVALID_ARGUMENT if a category with the label exists or the color is not one of Figma's.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Category label"
+        },
+        "color": {
+          "type": "string",
+          "enum": [
+            "yellow",
+            "orange",
+            "red",
+            "pink",
+            "violet",
+            "blue",
+            "teal",
+            "green"
+          ],
+          "description": "Category color"
+        }
+      },
+      "required": [
+        "label",
+        "color"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "get_annotation_categories",
+    "title": "Get annotation categories",
+    "description": "Returns the annotation categories of the file: [{ id, label, color, isPreset }].",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "set_node_annotations",
+    "title": "Set node annotations",
+    "description": "Replaces the annotations of one category on a layer with the given notes (Markdown); [] removes them. Annotations of other categories stay. Returns { id, name, annotations }. NOT_FOUND for an unknown layer or category; INVALID_ARGUMENT for a node that cannot have annotations.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Layer id"
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Annotation category id"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Annotation texts, Markdown; [] — remove this category's annotations"
+        }
+      },
+      "required": [
+        "id",
+        "categoryId",
+        "notes"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "clone_node",
+    "title": "Clone node",
+    "description": "Copies a layer with its children (node.clone()). By default the copy goes right after the original in the same parent; parentId / index put it elsewhere (index — its place among the parent's children, the end by default). Returns { id, name, type, parentId, index, x, y, width, height } (+ characters for text). Plus copies: [{ source, id, name }] — every layer of the copy against its original, in tree order, the copy itself first (in run_batch: saves \"copies[2].id\"). NOT_FOUND for an unknown node or parent; INVALID_ARGUMENT for a page, a component or component set, a layer inside an instance, a parent that cannot have children, an index out of range.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Layer id"
+        },
+        "parentId": {
+          "type": "string",
+          "description": "Parent of the copy: a page or a layer with children; the original's parent by default"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Place of the copy among the parent's children; right after the original by default"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "create_effect_style",
+    "title": "Create effect style",
+    "description": "Creates a local effect style, optionally with shadows and blurs as in set_effect_style_effects. Returns the style as in get_local_styles. INVALID_ARGUMENT if an effect style already has the name or an effect is invalid; NOT_FOUND for an unknown variable; nothing is created then.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Style name"
+        },
+        "effects": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "DROP_SHADOW",
+                      "INNER_SHADOW"
+                    ]
+                  },
+                  "color": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "variableId": {
+                            "type": "string",
+                            "description": "Variable id"
+                          }
+                        },
+                        "required": [
+                          "variableId"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ],
+                    "description": "\"#rrggbb\" / \"#rrggbbaa\" or { variableId } of a COLOR variable"
+                  },
+                  "x": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "$ref": "#/properties/effects/items/anyOf/0/properties/color/anyOf/1"
+                      }
+                    ],
+                    "description": "Offset x in px or { variableId } of a FLOAT variable"
+                  },
+                  "y": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/properties/effects/items/anyOf/0/properties/x/anyOf/0"
+                      },
+                      {
+                        "$ref": "#/properties/effects/items/anyOf/0/properties/color/anyOf/1"
+                      }
+                    ],
+                    "description": "Offset y in px or { variableId }"
+                  },
+                  "radius": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/properties/effects/items/anyOf/0/properties/x/anyOf/0"
+                      },
+                      {
+                        "$ref": "#/properties/effects/items/anyOf/0/properties/color/anyOf/1"
+                      }
+                    ],
+                    "description": "Blur radius in px (>= 0) or { variableId }"
+                  },
+                  "spread": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/properties/effects/items/anyOf/0/properties/x/anyOf/0"
+                      },
+                      {
+                        "$ref": "#/properties/effects/items/anyOf/0/properties/color/anyOf/1"
+                      }
+                    ],
+                    "description": "Spread in px or { variableId }"
+                  },
+                  "visible": {
+                    "type": "boolean",
+                    "description": "Default true"
+                  }
+                },
+                "required": [
+                  "type",
+                  "color",
+                  "x",
+                  "y",
+                  "radius",
+                  "spread"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "LAYER_BLUR",
+                      "BACKGROUND_BLUR"
+                    ]
+                  },
+                  "radius": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/properties/effects/items/anyOf/0/properties/x/anyOf/0"
+                      },
+                      {
+                        "$ref": "#/properties/effects/items/anyOf/0/properties/color/anyOf/1"
+                      }
+                    ],
+                    "description": "Blur radius in Figma units (>= 0; CSS blur() is half of it) or { variableId } of a FLOAT variable"
+                  },
+                  "visible": {
+                    "type": "boolean",
+                    "description": "Default true"
+                  }
+                },
+                "required": [
+                  "type",
+                  "radius"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "description": "Shadows and normal blurs in Figma array order: the LAST one is on top (top of the Figma panel); shadows get blendMode NORMAL, showShadowBehindNode false"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "create_frame",
+    "title": "Create frame",
+    "description": "Creates a frame in a parent: vertical auto layout without spacing, hugging its children, no fill by default. Optional layout (auto-layout settings), fills/strokes (paint lists), strokeWeight and cornerRadius are validated and built BEFORE the frame is created — on any error nothing is created. Returns { id, name, type, parentId, index, x, y, width, height }. NOT_FOUND for an unknown parent; INVALID_ARGUMENT for a parent that cannot have children, an instance or a layer inside one, an index out of range, or bad layout/paint values.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "parentId": {
+          "type": "string",
+          "description": "Parent id: a page or a layer with children (frame, group, …)"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Place among the parent's children; end by default"
+        },
+        "x": {
+          "type": "number",
+          "description": "X in the parent (a page or a frame without auto layout)"
+        },
+        "y": {
+          "type": "number",
+          "description": "Y in the parent (a page or a frame without auto layout)"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Layer name"
+        },
+        "layout": {
+          "type": "object",
+          "description": "Auto-layout settings to apply right after creation",
+          "properties": {
+            "direction": { "enum": ["HORIZONTAL", "VERTICAL"] },
+            "itemSpacing": { "type": "number", "minimum": 0 },
+            "padding": {
+              "oneOf": [
+                { "type": "number", "minimum": 0 },
+                {
+                  "type": "object",
+                  "properties": {
+                    "top": { "type": "number", "minimum": 0 },
+                    "right": { "type": "number", "minimum": 0 },
+                    "bottom": { "type": "number", "minimum": 0 },
+                    "left": { "type": "number", "minimum": 0 }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "primaryAxisSizingMode": { "enum": ["AUTO", "FIXED"] },
+            "counterAxisSizingMode": { "enum": ["AUTO", "FIXED"] },
+            "primaryAxisAlignItems": { "enum": ["MIN", "CENTER", "MAX", "SPACE_BETWEEN"] },
+            "counterAxisAlignItems": { "enum": ["MIN", "CENTER", "MAX", "BASELINE"] },
+            "layoutWrap": { "enum": ["NO_WRAP", "WRAP"] },
+            "strokesIncludedInLayout": { "type": "boolean" },
+            "itemReverseZIndex": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        "fills": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Fill paints: SOLID with hex or a bound COLOR variable, or gradients",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "enum": ["SOLID", "GRADIENT_LINEAR", "GRADIENT_RADIAL"] },
+              "color": {
+                "description": "SOLID only: \"#rrggbb\"/\"#rrggbbaa\" or { variableId } to bind a COLOR variable",
+                "oneOf": [
+                  { "type": "string", "pattern": "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$" },
+                  {
+                    "type": "object",
+                    "properties": { "variableId": { "type": "string", "minLength": 1 } },
+                    "required": ["variableId"],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "stops": {
+                "type": "array",
+                "minItems": 2,
+                "description": "Gradient stops (hex colors only — variables bind to SOLID paints)",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "position": { "type": "number", "minimum": 0, "maximum": 1 },
+                    "color": { "type": "string", "pattern": "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$" }
+                  },
+                  "required": ["position", "color"],
+                  "additionalProperties": false
+                }
+              },
+              "angle": { "type": "number", "description": "GRADIENT_LINEAR direction in degrees: 0 = left→right, 90 = top→bottom" },
+              "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+              "visible": { "type": "boolean" }
+            },
+            "required": ["type"],
+            "additionalProperties": false
+          }
+        },
+        "strokes": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Stroke paints (same shape as fills)",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "enum": ["SOLID", "GRADIENT_LINEAR", "GRADIENT_RADIAL"] },
+              "color": {
+                "description": "SOLID only: \"#rrggbb\"/\"#rrggbbaa\" or { variableId } to bind a COLOR variable",
+                "oneOf": [
+                  { "type": "string", "pattern": "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$" },
+                  {
+                    "type": "object",
+                    "properties": { "variableId": { "type": "string", "minLength": 1 } },
+                    "required": ["variableId"],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "stops": {
+                "type": "array",
+                "minItems": 2,
+                "description": "Gradient stops (hex colors only — variables bind to SOLID paints)",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "position": { "type": "number", "minimum": 0, "maximum": 1 },
+                    "color": { "type": "string", "pattern": "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$" }
+                  },
+                  "required": ["position", "color"],
+                  "additionalProperties": false
+                }
+              },
+              "angle": { "type": "number", "description": "GRADIENT_LINEAR direction in degrees: 0 = left→right, 90 = top→bottom" },
+              "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+              "visible": { "type": "boolean" }
+            },
+            "required": ["type"],
+            "additionalProperties": false
+          }
+        },
+        "strokeWeight": { "type": "number", "minimum": 0 },
+        "cornerRadius": { "type": "number", "minimum": 0 }
+      },
+      "required": [
+        "parentId",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "set_frame_layout",
+    "title": "Set frame layout",
+    "description": "Sets auto-layout settings on a frame, component or instance: direction, itemSpacing, padding, axis sizing/alignment, wrap. Enables auto layout (VERTICAL) when the node had none. Everything is validated BEFORE anything is applied — on error the file does not change. Returns { id, name, type, parentId, index, x, y, width, height }. NOT_FOUND for an unknown node; INVALID_ARGUMENT for a node that cannot have auto layout (a group — convert it to a frame first) or bad values.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Node id"
+        },
+        "direction": {
+          "enum": [
+            "HORIZONTAL",
+            "VERTICAL"
+          ]
+        },
+        "itemSpacing": {
+          "type": "number",
+          "minimum": 0
+        },
+        "padding": {
+          "oneOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "object",
+              "properties": {
+                "top": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "right": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "bottom": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "left": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "primaryAxisSizingMode": {
+          "enum": [
+            "AUTO",
+            "FIXED"
+          ]
+        },
+        "counterAxisSizingMode": {
+          "enum": [
+            "AUTO",
+            "FIXED"
+          ]
+        },
+        "primaryAxisAlignItems": {
+          "enum": [
+            "MIN",
+            "CENTER",
+            "MAX",
+            "SPACE_BETWEEN"
+          ]
+        },
+        "counterAxisAlignItems": {
+          "enum": [
+            "MIN",
+            "CENTER",
+            "MAX",
+            "BASELINE"
+          ]
+        },
+        "layoutWrap": {
+          "enum": [
+            "NO_WRAP",
+            "WRAP"
+          ]
+        },
+        "strokesIncludedInLayout": {
+          "type": "boolean"
+        },
+        "itemReverseZIndex": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "set_node_fills",
+    "title": "Set node fills",
+    "description": "Replaces a node's fills with a paint list (SOLID with hex or a bound COLOR variable, GRADIENT_LINEAR/RADIAL with hex stops), or clears them with clear: true. Paints are fully built and validated BEFORE assignment — on error fills stay untouched. Returns { id, name, type, parentId, index, x, y, width, height } + paints count. NOT_FOUND for an unknown node or variable; INVALID_ARGUMENT for a node without fills, bad paint input or a non-COLOR variable.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Node id"
+        },
+        "paints": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Fill paints: SOLID with hex or a bound COLOR variable, or gradients",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "SOLID",
+                  "GRADIENT_LINEAR",
+                  "GRADIENT_RADIAL"
+                ]
+              },
+              "color": {
+                "description": "SOLID only: \"#rrggbb\"/\"#rrggbbaa\" or { variableId } to bind a COLOR variable",
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "variableId": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "variableId"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "stops": {
+                "type": "array",
+                "minItems": 2,
+                "description": "Gradient stops (hex colors only — variables bind to SOLID paints)",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "position": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "color": {
+                      "type": "string",
+                      "pattern": "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+                    }
+                  },
+                  "required": [
+                    "position",
+                    "color"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "angle": {
+                "type": "number",
+                "description": "GRADIENT_LINEAR direction in degrees: 0 = left→right, 90 = top→bottom"
+              },
+              "opacity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "visible": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "clear": {
+          "type": "boolean",
+          "description": "true removes all fills; cannot be combined with paints"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "set_node_strokes",
+    "title": "Set node strokes",
+    "description": "Replaces a node's strokes with a paint list (same shape as set_node_fills), optionally setting strokeWeight and strokeAlign. Paints are fully built and validated BEFORE assignment — on error strokes stay untouched. Returns { id, name, type, parentId, index, x, y, width, height } + paints count. NOT_FOUND for an unknown node or variable; INVALID_ARGUMENT for a node without strokes or bad paint/stroke values.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Node id"
+        },
+        "paints": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Stroke paints: SOLID with hex or a bound COLOR variable, or gradients",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "SOLID",
+                  "GRADIENT_LINEAR",
+                  "GRADIENT_RADIAL"
+                ]
+              },
+              "color": {
+                "description": "SOLID only: \"#rrggbb\"/\"#rrggbbaa\" or { variableId } to bind a COLOR variable",
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "variableId": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "variableId"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "stops": {
+                "type": "array",
+                "minItems": 2,
+                "description": "Gradient stops (hex colors only — variables bind to SOLID paints)",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "position": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "color": {
+                      "type": "string",
+                      "pattern": "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+                    }
+                  },
+                  "required": [
+                    "position",
+                    "color"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "angle": {
+                "type": "number",
+                "description": "GRADIENT_LINEAR direction in degrees: 0 = left→right, 90 = top→bottom"
+              },
+              "opacity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "visible": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "clear": {
+          "type": "boolean",
+          "description": "true removes all strokes; cannot be combined with paints"
+        },
+        "strokeWeight": {
+          "type": "number",
+          "minimum": 0
+        },
+        "strokeAlign": {
+          "enum": [
+            "INSIDE",
+            "OUTSIDE",
+            "CENTER"
+          ]
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "set_node_corner_radius",
+    "title": "Set node corner radius",
+    "description": "Sets the corner radius: one number for all corners or per-corner { topLeft, topRight, bottomRight, bottomLeft }. All values are validated BEFORE applying. Returns { id, name, type, parentId, index, x, y, width, height }. NOT_FOUND for an unknown node; INVALID_ARGUMENT for a node without a corner radius (or without per-corner radii) or negative values.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Node id"
+        },
+        "radius": {
+          "description": "One radius or per-corner radii",
+          "oneOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "object",
+              "properties": {
+                "topLeft": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "topRight": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "bottomRight": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "bottomLeft": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "radius"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "set_node_size",
+    "title": "Set node size",
+    "description": "Resizes a node (width/height, keeps the unset axis) and/or sets its layout sizing per axis: FIXED, HUG or FILL. Figma rules are checked BEFORE applying: HUG only on an auto-layout frame or a text node, FILL only inside an auto-layout parent — on violation nothing changes. Returns { id, name, type, parentId, index, x, y, width, height }. NOT_FOUND for an unknown node; INVALID_ARGUMENT for a non-resizable node or broken sizing rules.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Node id"
+        },
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "layoutSizingHorizontal": {
+          "enum": [
+            "FIXED",
+            "HUG",
+            "FILL"
+          ]
+        },
+        "layoutSizingVertical": {
+          "enum": [
+            "FIXED",
+            "HUG",
+            "FILL"
+          ]
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "set_node_layout_child",
+    "title": "Set node layout child",
+    "description": "Sets how a node behaves as a child: layoutGrow (0/1), layoutAlign (INHERIT/STRETCH) and layoutPositioning (AUTO/ABSOLUTE) inside an auto-layout parent; constraints (horizontal/vertical) for nodes in a plain frame. The parent is checked BEFORE applying. Returns { id, name, type, parentId, index, x, y, width, height }. NOT_FOUND for an unknown node; INVALID_ARGUMENT when the parent is not auto layout (for layout* fields) or the node has no constraints.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Node id"
+        },
+        "layoutGrow": {
+          "enum": [
+            0,
+            1
+          ],
+          "description": "1 = fill the primary axis"
+        },
+        "layoutAlign": {
+          "enum": [
+            "INHERIT",
+            "STRETCH"
+          ],
+          "description": "STRETCH = fill the counter axis"
+        },
+        "layoutPositioning": {
+          "enum": [
+            "AUTO",
+            "ABSOLUTE"
+          ]
+        },
+        "constraints": {
+          "type": "object",
+          "properties": {
+            "horizontal": {
+              "enum": [
+                "MIN",
+                "CENTER",
+                "MAX",
+                "STRETCH",
+                "SCALE"
+              ]
+            },
+            "vertical": {
+              "enum": [
+                "MIN",
+                "CENTER",
+                "MAX",
+                "STRETCH",
+                "SCALE"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "create_rectangle",
+    "title": "Create rectangle",
+    "description": "Creates a rectangle in a parent with width/height, optional fills/strokes/strokeWeight/cornerRadius. Paints are built BEFORE the node is created — on any error nothing is created. Returns { id, name, type, parentId, index, x, y, width, height }. NOT_FOUND for an unknown parent; INVALID_ARGUMENT for a parent that cannot have children, an instance or a layer inside one, bad size or paint.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "parentId": {
+          "type": "string",
+          "description": "Parent id: a page or a layer with children (frame, group, …)"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Place among the parent's children; end by default"
+        },
+        "x": {
+          "type": "number",
+          "description": "X in the parent (a page or a frame without auto layout)"
+        },
+        "y": {
+          "type": "number",
+          "description": "Y in the parent (a page or a frame without auto layout)"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Layer name"
+        },
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "fills": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Fill paints: SOLID with hex or a bound COLOR variable, or gradients",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "SOLID",
+                  "GRADIENT_LINEAR",
+                  "GRADIENT_RADIAL"
+                ]
+              },
+              "color": {
+                "description": "SOLID only: \"#rrggbb\"/\"#rrggbbaa\" or { variableId } to bind a COLOR variable",
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "variableId": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "variableId"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "stops": {
+                "type": "array",
+                "minItems": 2,
+                "description": "Gradient stops (hex colors only — variables bind to SOLID paints)",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "position": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "color": {
+                      "type": "string",
+                      "pattern": "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+                    }
+                  },
+                  "required": [
+                    "position",
+                    "color"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "angle": {
+                "type": "number",
+                "description": "GRADIENT_LINEAR direction in degrees: 0 = left→right, 90 = top→bottom"
+              },
+              "opacity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "visible": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "strokes": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Stroke paints: SOLID with hex or a bound COLOR variable, or gradients",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "SOLID",
+                  "GRADIENT_LINEAR",
+                  "GRADIENT_RADIAL"
+                ]
+              },
+              "color": {
+                "description": "SOLID only: \"#rrggbb\"/\"#rrggbbaa\" or { variableId } to bind a COLOR variable",
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "variableId": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "variableId"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "stops": {
+                "type": "array",
+                "minItems": 2,
+                "description": "Gradient stops (hex colors only — variables bind to SOLID paints)",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "position": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "color": {
+                      "type": "string",
+                      "pattern": "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+                    }
+                  },
+                  "required": [
+                    "position",
+                    "color"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "angle": {
+                "type": "number",
+                "description": "GRADIENT_LINEAR direction in degrees: 0 = left→right, 90 = top→bottom"
+              },
+              "opacity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "visible": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "strokeWeight": {
+          "type": "number",
+          "minimum": 0
+        },
+        "cornerRadius": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "parentId",
+        "name",
+        "width",
+        "height"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "create_ellipse",
+    "title": "Create ellipse",
+    "description": "Creates an ellipse in a parent with width/height, optional fills/strokes/strokeWeight. Paints are built BEFORE the node is created — on any error nothing is created. Returns { id, name, type, parentId, index, x, y, width, height }. NOT_FOUND for an unknown parent; INVALID_ARGUMENT for a parent that cannot have children, an instance or a layer inside one, bad size or paint.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "parentId": {
+          "type": "string",
+          "description": "Parent id: a page or a layer with children (frame, group, …)"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Place among the parent's children; end by default"
+        },
+        "x": {
+          "type": "number",
+          "description": "X in the parent (a page or a frame without auto layout)"
+        },
+        "y": {
+          "type": "number",
+          "description": "Y in the parent (a page or a frame without auto layout)"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Layer name"
+        },
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "fills": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Fill paints: SOLID with hex or a bound COLOR variable, or gradients",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "SOLID",
+                  "GRADIENT_LINEAR",
+                  "GRADIENT_RADIAL"
+                ]
+              },
+              "color": {
+                "description": "SOLID only: \"#rrggbb\"/\"#rrggbbaa\" or { variableId } to bind a COLOR variable",
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "variableId": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "variableId"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "stops": {
+                "type": "array",
+                "minItems": 2,
+                "description": "Gradient stops (hex colors only — variables bind to SOLID paints)",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "position": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "color": {
+                      "type": "string",
+                      "pattern": "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+                    }
+                  },
+                  "required": [
+                    "position",
+                    "color"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "angle": {
+                "type": "number",
+                "description": "GRADIENT_LINEAR direction in degrees: 0 = left→right, 90 = top→bottom"
+              },
+              "opacity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "visible": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "strokes": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Stroke paints: SOLID with hex or a bound COLOR variable, or gradients",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "SOLID",
+                  "GRADIENT_LINEAR",
+                  "GRADIENT_RADIAL"
+                ]
+              },
+              "color": {
+                "description": "SOLID only: \"#rrggbb\"/\"#rrggbbaa\" or { variableId } to bind a COLOR variable",
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "variableId": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "variableId"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "stops": {
+                "type": "array",
+                "minItems": 2,
+                "description": "Gradient stops (hex colors only — variables bind to SOLID paints)",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "position": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "color": {
+                      "type": "string",
+                      "pattern": "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+                    }
+                  },
+                  "required": [
+                    "position",
+                    "color"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "angle": {
+                "type": "number",
+                "description": "GRADIENT_LINEAR direction in degrees: 0 = left→right, 90 = top→bottom"
+              },
+              "opacity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "visible": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "strokeWeight": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "parentId",
+        "name",
+        "width",
+        "height"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "apply_style",
+    "title": "Apply style",
+    "description": "Applies a local style to a node by target: fill/stroke (a PAINT style), text (a TEXT style, text nodes only) or effect (an EFFECT style). The style type must match the target — checked BEFORE applying. Returns { id, name, type, parentId, index, x, y, width, height } + styleId/styleName/styleType/target. NOT_FOUND for an unknown node or style; INVALID_ARGUMENT for a type mismatch or a node that cannot take the target.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Node id"
+        },
+        "styleId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Local style id (see get_local_styles)"
+        },
+        "target": {
+          "enum": [
+            "fill",
+            "stroke",
+            "text",
+            "effect"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "styleId",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "bind_node_variable",
+    "title": "Bind node variable",
+    "description": "Binds a variable to a node field, or unbinds with variableId: null. Color fields fills/strokes bind a COLOR variable to the FIRST paint of the array (it must exist and be SOLID). Float fields (a FLOAT variable): width, height, itemSpacing, paddingTop/paddingRight/paddingBottom/paddingLeft, topLeftRadius/topRightRadius/bottomRightRadius/bottomLeftRadius, fontSize (text nodes only). All checks run BEFORE binding. Returns { id, name, type, parentId, index, x, y, width, height } + field/variableId/variableName. NOT_FOUND for an unknown node or variable; INVALID_ARGUMENT for a wrong field, type mismatch or a missing/non-SOLID first paint.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Node id"
+        },
+        "field": {
+          "enum": [
+            "fills",
+            "strokes",
+            "width",
+            "height",
+            "itemSpacing",
+            "paddingTop",
+            "paddingRight",
+            "paddingBottom",
+            "paddingLeft",
+            "topLeftRadius",
+            "topRightRadius",
+            "bottomRightRadius",
+            "bottomLeftRadius",
+            "fontSize"
+          ],
+          "description": "fills/strokes bind the first paint (COLOR variable); the rest bind a number property (FLOAT variable)"
+        },
+        "variableId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "description": "Variable id, or null to unbind"
+        }
+      },
+      "required": [
+        "id",
+        "field",
+        "variableId"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "create_component_from_node",
+    "title": "Create component from node",
+    "description": "Turns an existing node into a component, keeping its auto layout, bound variables and styles as they are. Optional name renames the result. Returns { id, name, type, parentId, index, x, y, width, height }. NOT_FOUND for an unknown node; INVALID_ARGUMENT for a page, an instance or a node inside an instance (detach it first).",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Node id"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "New component name; the node name is kept by default"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "create_component",
+    "title": "Create component",
+    "description": "Creates an empty component in a parent, optionally resized and positioned. Returns { id, name, type, parentId, index, x, y, width, height }. NOT_FOUND for an unknown parent; INVALID_ARGUMENT for a parent that cannot have children, an instance or a layer inside one, an index out of range or a bad size — nothing is created then.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "parentId": {
+          "type": "string",
+          "description": "Parent id: a page or a layer with children (frame, group, …)"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Place among the parent's children; end by default"
+        },
+        "x": {
+          "type": "number",
+          "description": "X in the parent (a page or a frame without auto layout)"
+        },
+        "y": {
+          "type": "number",
+          "description": "Y in the parent (a page or a frame without auto layout)"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Layer name"
+        },
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "parentId",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "create_component_set",
+    "title": "Create component set",
+    "description": "Combines existing components into a variant set inside a parent (figma.combineAsVariants). Every id is checked to be a COMPONENT BEFORE combining — on error nothing changes. Returns { id, name, type, parentId, index, x, y, width, height } of the COMPONENT_SET. NOT_FOUND for an unknown component or parent; INVALID_ARGUMENT for a non-component id, a parent that cannot have children or an index out of range.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "parentId": {
+          "type": "string",
+          "description": "Parent id: a page or a layer with children (frame, group, …)"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Place among the parent's children; end by default"
+        },
+        "x": {
+          "type": "number",
+          "description": "X in the parent (a page or a frame without auto layout)"
+        },
+        "y": {
+          "type": "number",
+          "description": "Y in the parent (a page or a frame without auto layout)"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Layer name"
+        },
+        "componentIds": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Ids of the COMPONENT nodes to combine, in variant order",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "parentId",
+        "name",
+        "componentIds"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "set_component_properties",
+    "title": "Set component properties",
+    "description": "Sets properties of a component or a component set; currently description (shown in the inspector and on hover). Returns { id, name, type, parentId, index, x, y, width, height } + description. NOT_FOUND for an unknown node; INVALID_ARGUMENT for a node that is not a COMPONENT/COMPONENT_SET.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Node id"
+        },
+        "description": {
+          "type": "string",
+          "description": "Component description; an empty string clears it"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "create_image",
+    "title": "Create image",
+    "description": "Creates a rectangle in a parent with an image fill from a file (PNG, JPEG or GIF, up to 4096 × 4096 px), sized as the image. Returns { id, name, type, parentId, index, x, y, width, height } (+ characters for text). Also imageHash. NOT_FOUND for an unknown parent; INVALID_ARGUMENT for a parent that cannot have children, an instance or a layer inside one, an index out of range; nothing is created then. INVALID_ARGUMENT also for an unreadable file or an image Figma rejects.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "parentId": {
+          "type": "string",
+          "description": "Parent id: a page or a layer with children (frame, group, …)"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Place among the parent's children; end by default"
+        },
+        "x": {
+          "type": "number",
+          "description": "X in the parent (a page or a frame without auto layout)"
+        },
+        "y": {
+          "type": "number",
+          "description": "Y in the parent (a page or a frame without auto layout)"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Layer name"
+        },
+        "file": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Image file (absolute path recommended)"
+        }
+      },
+      "required": [
+        "parentId",
+        "name",
+        "file"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "uploadBinary",
+    "timeoutMs": 120000
+  },
+  {
+    "name": "create_paint_style",
+    "title": "Create paint style",
+    "description": "Creates a local paint style, optionally with paints as in set_paint_style_paints. Returns the style as in get_local_styles. INVALID_ARGUMENT if a paint style already has the name or a paint is invalid; NOT_FOUND for an unknown variable; nothing is created then.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Style name"
+        },
+        "paints": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "SOLID"
+                  },
+                  "color": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "variableId": {
+                            "type": "string",
+                            "description": "Variable id"
+                          }
+                        },
+                        "required": [
+                          "variableId"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ],
+                    "description": "\"#rrggbb\" / \"#rrggbbaa\" or { variableId } of a COLOR variable"
+                  }
+                },
+                "required": [
+                  "type",
+                  "color"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "GRADIENT_LINEAR"
+                  },
+                  "angle": {
+                    "type": "number",
+                    "description": "CSS angle in degrees: 0 — to top, 90 — to right, 180 — to bottom"
+                  },
+                  "stops": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "position": {
+                          "type": "number",
+                          "description": "0..1 along the gradient"
+                        },
+                        "color": {
+                          "$ref": "#/properties/paints/items/anyOf/0/properties/color"
+                        }
+                      },
+                      "required": [
+                        "position",
+                        "color"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 2,
+                    "description": "Color stops in ascending position"
+                  }
+                },
+                "required": [
+                  "type",
+                  "angle",
+                  "stops"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "GRADIENT_RADIAL"
+                  },
+                  "center": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Ellipse center in fractions of the box (0.5, 0.5 — middle)"
+                  },
+                  "radius": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "$ref": "#/properties/paints/items/anyOf/2/properties/center/properties/x"
+                      },
+                      "y": {
+                        "$ref": "#/properties/paints/items/anyOf/2/properties/center/properties/y"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Half-axes in fractions of the box (0.5, 0.5 — touches the edges)"
+                  },
+                  "stops": {
+                    "$ref": "#/properties/paints/items/anyOf/1/properties/stops"
+                  }
+                },
+                "required": [
+                  "type",
+                  "center",
+                  "radius",
+                  "stops"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "description": "Paints in Figma array order: the LAST one is on top (top of the Figma panel), paints[0] at the bottom; visible, opacity 1, blendMode NORMAL"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "create_svg",
+    "title": "Create SVG",
+    "description": "Creates a frame of vectors from an SVG file (createNodeFromSvg) in a parent. Returns { id, name, type, parentId, index, x, y, width, height } (+ characters for text). NOT_FOUND for an unknown parent; INVALID_ARGUMENT for a parent that cannot have children, an instance or a layer inside one, an index out of range; nothing is created then. INVALID_ARGUMENT also for an unreadable file or SVG Figma cannot read.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "parentId": {
+          "type": "string",
+          "description": "Parent id: a page or a layer with children (frame, group, …)"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Place among the parent's children; end by default"
+        },
+        "x": {
+          "type": "number",
+          "description": "X in the parent (a page or a frame without auto layout)"
+        },
+        "y": {
+          "type": "number",
+          "description": "Y in the parent (a page or a frame without auto layout)"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Layer name"
+        },
+        "file": {
+          "type": "string",
+          "minLength": 1,
+          "description": "SVG file (absolute path recommended)"
+        }
+      },
+      "required": [
+        "parentId",
+        "name",
+        "file"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "uploadText"
+  },
+  {
+    "name": "create_text",
+    "title": "Create text",
+    "description": "Creates a TEXT layer in a parent with the given text in Inter Regular (the font is loaded first). Returns { id, name, type, parentId, index, x, y, width, height } (+ characters for text). NOT_FOUND for an unknown parent; INVALID_ARGUMENT for a parent that cannot have children, an instance or a layer inside one, an index out of range; nothing is created then.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "parentId": {
+          "type": "string",
+          "description": "Parent id: a page or a layer with children (frame, group, …)"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Place among the parent's children; end by default"
+        },
+        "x": {
+          "type": "number",
+          "description": "X in the parent (a page or a frame without auto layout)"
+        },
+        "y": {
+          "type": "number",
+          "description": "Y in the parent (a page or a frame without auto layout)"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Layer name"
+        },
+        "text": {
+          "type": "string",
+          "description": "Text"
+        }
+      },
+      "required": [
+        "parentId",
+        "name",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "create_text_style",
+    "title": "Create text style",
+    "description": "Creates a local text style with a font and optional size, line height and letter spacing; fields left out keep the Figma default. Values are plain (not bound) — bind variables with set_text_style_variable. Returns the style as in get_local_styles. INVALID_ARGUMENT if a text style already has the name, the font is not available in Figma or a value is invalid; nothing is created then.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Style name"
+        },
+        "fontName": {
+          "type": "object",
+          "properties": {
+            "family": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Font family, e.g. \"Inter\""
+            },
+            "style": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Font style as the font names it, e.g. \"Regular\", \"Semi Bold\""
+            }
+          },
+          "required": [
+            "family",
+            "style"
+          ],
+          "additionalProperties": false,
+          "description": "Font family + style; must be available in Figma (get_available_fonts)"
+        },
+        "fontSize": {
+          "type": "number",
+          "description": "Font size in px"
+        },
+        "lineHeight": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "unit": {
+                  "type": "string",
+                  "const": "AUTO"
+                }
+              },
+              "required": [
+                "unit"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "unit": {
+                  "type": "string",
+                  "enum": [
+                    "PIXELS",
+                    "PERCENT"
+                  ]
+                },
+                "value": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "unit",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "{ unit: \"AUTO\" } or { unit: \"PIXELS\" | \"PERCENT\", value }"
+        },
+        "letterSpacing": {
+          "type": "object",
+          "properties": {
+            "unit": {
+              "type": "string",
+              "enum": [
+                "PIXELS",
+                "PERCENT"
+              ]
+            },
+            "value": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "unit",
+            "value"
+          ],
+          "additionalProperties": false,
+          "description": "{ unit: \"PIXELS\" | \"PERCENT\", value }"
+        }
+      },
+      "required": [
+        "name",
+        "fontName"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "create_variable",
+    "title": "Create variable",
+    "description": "Creates a variable in a local collection. values maps mode id → value (primitive or alias); modes left out keep the Figma default. All values are checked before anything is created. Returns the variable as in get_variable. NOT_FOUND for an unknown collection or alias target; INVALID_ARGUMENT if the name is taken in the collection, a mode is not in it, or a value does not match the type.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "collectionId": {
+          "type": "string",
+          "description": "Collection id"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Variable name, \"<group>/<name>\""
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "COLOR",
+            "FLOAT",
+            "STRING",
+            "BOOLEAN"
+          ],
+          "description": "Variable type"
+        },
+        "values": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "VARIABLE_ALIAS"
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "Id of the variable to alias"
+                  }
+                },
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "additionalProperties": false
+              }
+            ],
+            "description": "COLOR: \"#rrggbb\" or \"#rrggbbaa\"; FLOAT: number; STRING: string; BOOLEAN: true/false; or an alias { type: \"VARIABLE_ALIAS\", id } to a variable of the same type"
+          },
+          "description": "Mode id → value"
+        }
+      },
+      "required": [
+        "collectionId",
+        "name",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "create_variable_collection",
+    "title": "Create variable collection",
+    "description": "Creates a local variable collection. modes lists mode names in order: the first one names the mode created with the collection and becomes its default mode for good (Figma cannot change the default mode later). Without modes the collection gets one mode named by Figma. Returns the collection as in get_variable_collections.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Collection name"
+        },
+        "modes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "description": "Mode names; the first becomes the default mode"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "delete_node",
+    "title": "Delete node",
+    "description": "Deletes a layer with all its children. Returns { id, name, type } of the deleted layer. NOT_FOUND for an unknown node; INVALID_ARGUMENT for a page or a layer inside an instance.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Layer id"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "delete_style",
+    "title": "Delete style",
+    "description": "Deletes a local style of any kind. Nodes that use it keep their values and lose the link to the style. Returns { id, type, name } of the deleted style; NOT_FOUND for an unknown style.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Style id"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "delete_variable",
+    "title": "Delete variable",
+    "description": "Deletes a local variable. Returns { id, name, collectionId } of the deleted variable; NOT_FOUND for an unknown variable.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Variable id"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "delete_variable_collection",
+    "title": "Delete variable collection",
+    "description": "Deletes a local variable collection together with all its variables. Returns { id, name, deletedVariableCount }; NOT_FOUND if there is no local collection with this id.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Collection id"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "delete_variable_group",
+    "title": "Delete variable group",
+    "description": "Deletes all variables of a group in one local collection. Returns { collectionId, group, deleted [{ id, name }] }. NOT_FOUND for an unknown collection or group.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "collectionId": {
+          "type": "string",
+          "description": "Collection id"
+        },
+        "group": {
+          "type": "string",
+          "description": "Group name, as in get_variable_groups"
+        }
+      },
+      "required": [
+        "collectionId",
+        "group"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "delete_variable_mode",
+    "title": "Delete variable mode",
+    "description": "Deletes a mode of a local variable collection together with the values of all variables in it. Returns the collection as in get_variable_collections. NOT_FOUND for an unknown collection; INVALID_ARGUMENT if the mode is not in this collection or is its only mode.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "collectionId": {
+          "type": "string",
+          "description": "Collection id"
+        },
+        "modeId": {
+          "type": "string",
+          "description": "Mode id"
+        }
+      },
+      "required": [
+        "collectionId",
+        "modeId"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "export_node_png",
+    "title": "Export node as PNG",
+    "description": "Exports a snapshot of a node as PNG (exportAsync PNG, constraint SCALE) and writes it to outFile. Returns { savedTo, bytes, id, name, format, scale }. NOT_FOUND for an unknown node; INVALID_ARGUMENT for a node that cannot be exported or a bad scale.",
+    "annotations": {
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Node id"
+        },
+        "scale": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 1,
+          "description": "Scale: 1 — as in the layout, 2 — twice as large"
+        },
+        "outFile": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The .png file to write (absolute path recommended)"
+        }
+      },
+      "required": [
+        "id",
+        "outFile"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "dataFile",
+    "encoding": "base64",
+    "timeoutMs": 120000
+  },
+  {
+    "name": "export_node_svg",
+    "title": "Export node as SVG",
+    "description": "Exports a node as SVG code (exportAsync SVG_STRING; Figma defaults: text as outlines, no id attributes, simplified strokes) and writes it to outFile. Returns { savedTo, bytes, id, name, format }. NOT_FOUND for an unknown node; INVALID_ARGUMENT for a node that cannot be exported.",
+    "annotations": {
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Node id"
+        },
+        "outFile": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The .svg file to write (absolute path recommended)"
+        }
+      },
+      "required": [
+        "id",
+        "outFile"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "dataFile",
+    "encoding": "utf8",
+    "timeoutMs": 120000
+  },
+  {
+    "name": "get_available_fonts",
+    "title": "Get available fonts",
+    "description": "Lists the fonts available in Figma (as in the font picker): [{ family, styles: [\"Regular\", \"Semi Bold\", …] }]. The list is long — pass outFile.",
+    "annotations": {
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "outFile": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Write the result as JSON to this file (absolute path recommended) and return only { savedTo, count }"
+        }
+      },
+      "additionalProperties": false
+    },
+    "kind": "toFile"
+  },
+  {
+    "name": "get_local_styles",
+    "title": "Get local styles",
+    "description": "Lists all local styles of the open Figma file in panel order, kinds TEXT, EFFECT, PAINT, GRID: id, type, name and the fields of the kind. TEXT: fontName { family, style }, fontSize, lineHeight and letterSpacing ({ unit: \"PIXELS\" | \"PERCENT\", value } or { unit: \"AUTO\" }), textCase, textDecoration, paragraphSpacing, paragraphIndent, boundVariables { field: { type: \"VARIABLE_ALIAS\", id, alias, aliasCollection } }. EFFECT: effects; PAINT: paints; GRID: layoutGrids — as Figma gives them, colors as lowercase hex, bound variables in alias form. With outFile the list goes to that file — use it for bulk reads.",
+    "annotations": {
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "outFile": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Write the result as JSON to this file (absolute path recommended) and return only { savedTo, count }"
+        }
+      },
+      "additionalProperties": false
+    },
+    "kind": "toFile"
+  },
+  {
+    "name": "get_local_variables",
+    "title": "Get local variables",
+    "description": "Lists all local variables of the open Figma file: id, name, type, collectionId, collection and values [{ modeId, mode, value }], codeSyntax { WEB?, ANDROID?, iOS? } (only the platforms that are set, scopes — where it is offered in Figma pickers, [] = hidden; e.g. { WEB: \"--color-primary\" }). COLOR values are lowercase hex (#rrggbb, #rrggbbaa with transparency). An alias value is { type: \"VARIABLE_ALIAS\", id, alias, aliasCollection } — alias is the target variable name, aliasCollection its collection name (both null if the target no longer exists). With outFile the list goes to that file — use it for bulk reads.",
+    "annotations": {
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "outFile": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Write the result as JSON to this file (absolute path recommended) and return only { savedTo, count }"
+        }
+      },
+      "additionalProperties": false
+    },
+    "kind": "toFile"
+  },
+  {
+    "name": "get_node_css",
+    "title": "Get node CSS",
+    "description": "Returns the CSS of a node and of every layer under it, as the Dev Mode inspect panel shows it (getCSSAsync): { nodes: [{ id, name, type, parentId, css: { property: value } }] } in tree order. The data is large — pass outFile. NOT_FOUND for an unknown node; INVALID_ARGUMENT for a page.",
+    "annotations": {
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Node id"
+        },
+        "outFile": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Write the result as JSON to this file (absolute path recommended) and return only { savedTo, count }"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "toFile",
+    "timeoutMs": 120000
+  },
+  {
+    "name": "get_node_tree",
+    "title": "Get node tree",
+    "description": "Returns the whole subtree of a node in the Figma REST API format (exportAsync JSON_REST_V1, as GET /v1/files): { document, components, componentSets, styles, … }; document holds the node with all its children and fields (characters and style overrides of texts, fills with imageRef, componentId, boundVariables, …). The data is large — pass outFile. NOT_FOUND for an unknown node; INVALID_ARGUMENT for a node that cannot be exported.",
+    "annotations": {
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Node id"
+        },
+        "outFile": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Write the result as JSON to this file (absolute path recommended) and return only { savedTo, count }"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "toFile",
+    "timeoutMs": 120000
+  },
+  {
+    "name": "get_selection",
+    "title": "Get selection",
+    "description": "Returns the selection on the current Figma page: { page: { id, name }, nodes: [{ id, name, type, top }] } — top { id, name, type }: the layer's ancestor right under the page (the layout frame), the layer itself if it lies on the page. Nothing selected — nodes is empty.",
+    "annotations": {
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "get_status",
+    "title": "Get connection status",
+    "description": "Checks the Claude Code → MCP server → Figma plugin link. On success returns server { port, label, labelSource: default|set, env: desktop|cli }, plugin state and the name of the file open in Figma. Otherwise returns an error { code, message, server } with code PORT_IN_USE, PLUGIN_NOT_CONNECTED or TIMEOUT. Call it before working with Figma; labelSource \"default\" → name the session with set_session_label first.",
+    "annotations": {
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "kind": "status"
+  },
+  {
+    "name": "get_variable",
+    "title": "Get variable",
+    "description": "Returns one variable by id in the same format as get_local_variables items. Returns NOT_FOUND if there is no variable with this id.",
+    "annotations": {
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Variable id"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "get_variable_collections",
+    "title": "Get variable collections",
+    "description": "Lists local variable collections of the open Figma file: id, name, modes [{ id, name }], defaultModeId and variableCount. With outFile the list goes to that file.",
+    "annotations": {
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "outFile": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Write the result as JSON to this file (absolute path recommended) and return only { savedTo, count }"
+        }
+      },
+      "additionalProperties": false
+    },
+    "kind": "toFile"
+  },
+  {
+    "name": "get_variable_groups",
+    "title": "Get variable groups",
+    "description": "Lists variable groups of one local collection with the number of variables in each. A group is the name prefix before the last \"/\" (\"colors/blue-400\" → \"colors\"); variables without \"/\" are counted under the group \"\". Returns NOT_FOUND if there is no local collection with this id. With outFile the result goes to that file.",
+    "annotations": {
+      "readOnlyHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "collectionId": {
+          "type": "string",
+          "description": "Variable collection id"
+        },
+        "outFile": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Write the result as JSON to this file (absolute path recommended) and return only { savedTo, count }"
+        }
+      },
+      "required": [
+        "collectionId"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "toFile"
+  },
+  {
+    "name": "group_nodes",
+    "title": "Group nodes",
+    "description": "Wraps layers of one parent in a new group (figma.group). The layers keep their place on screen and their own order; the group takes the stack place index (among the parent's children after grouping), by default the place of the topmost of them. Returns { id, name, type, parentId, index, x, y, width, height, children }. NOT_FOUND for an unknown layer; INVALID_ARGUMENT for an empty or repeating list, layers of different parents, a page, a layer inside an instance, an index out of range; nothing is changed then.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "description": "Ids of the layers to group, all of one parent"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Group name"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Place of the group among the parent's children after grouping; default — the place of the topmost layer"
+        }
+      },
+      "required": [
+        "ids",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "move_node",
+    "title": "Move node",
+    "description": "Moves a layer into a parent (the same or another) at a place among its children; index is the place after the move, the end by default. The id is kept. Returns { id, name, type, parentId, index, x, y, width, height } (+ characters for text). NOT_FOUND for an unknown node or parent; INVALID_ARGUMENT for a page, a parent that cannot have children, an index out of range, a move into the layer itself or its child, a layer or parent inside an instance.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Layer id"
+        },
+        "parentId": {
+          "type": "string",
+          "description": "New parent id: a page or a layer with children"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Place among the parent's children after the move; end by default"
+        }
+      },
+      "required": [
+        "id",
+        "parentId"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "move_style",
+    "title": "Move style",
+    "description": "Moves a local style of any kind right after another local style of the same kind, or first with afterId null (the order of the styles panel and of get_local_styles). Returns { id, type, name, order } — order is the names of that kind after the move. NOT_FOUND for an unknown style; INVALID_ARGUMENT if the styles are of different kinds.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Style id"
+        },
+        "afterId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id of the style to put it after, or null to put it first"
+        }
+      },
+      "required": [
+        "id",
+        "afterId"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "rename_node",
+    "title": "Rename node",
+    "description": "Renames a layer; its id is kept. Returns { id, name, type, parentId, index, x, y, width, height } (+ characters for text). NOT_FOUND for an unknown node; INVALID_ARGUMENT for a page.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Layer id"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "New name"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "rename_style",
+    "title": "Rename style",
+    "description": "Renames a local style of any kind; its id and the nodes using it are kept. Returns the style as in get_local_styles. NOT_FOUND for an unknown style; INVALID_ARGUMENT if a style of the same kind already has the name.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Style id"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "New name"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "rename_variable",
+    "title": "Rename variable",
+    "description": "Renames a local variable; its id and the bindings in the file are kept. Returns the variable as in get_variable. NOT_FOUND for an unknown variable; INVALID_ARGUMENT if the name is taken in its collection.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Variable id"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "New name, \"<group>/<name>\""
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "rename_variable_collection",
+    "title": "Rename variable collection",
+    "description": "Renames a local variable collection. Returns the collection as in get_variable_collections; NOT_FOUND if there is no local collection with this id.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Collection id"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "New collection name"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "rename_variable_group",
+    "title": "Rename variable group",
+    "description": "Renames a group of one local collection: every variable \"<group>/<name>\" becomes \"<new name>/<name>\". Returns { collectionId, group, variables [{ id, name }] }. NOT_FOUND for an unknown collection or group; INVALID_ARGUMENT if any new name is taken — then nothing is renamed.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "collectionId": {
+          "type": "string",
+          "description": "Collection id"
+        },
+        "group": {
+          "type": "string",
+          "description": "Current group name, as in get_variable_groups"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "New group name"
+        }
+      },
+      "required": [
+        "collectionId",
+        "group",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "rename_variable_mode",
+    "title": "Rename variable mode",
+    "description": "Renames a mode of a local variable collection. Returns the collection as in get_variable_collections. NOT_FOUND for an unknown collection; INVALID_ARGUMENT if the mode is not in this collection or the name is taken.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "collectionId": {
+          "type": "string",
+          "description": "Collection id"
+        },
+        "modeId": {
+          "type": "string",
+          "description": "Mode id"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "New mode name"
+        }
+      },
+      "required": [
+        "collectionId",
+        "modeId",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "replace_with_svg",
+    "title": "Replace with SVG",
+    "description": "Replaces a node with a frame of vectors made from an SVG file (createNodeFromSvg). The frame takes the node's parent, place among the children, x / y, size, name, constraints and auto-layout settings; the old node is removed. The new node has a NEW id: returns { id, oldId, name, width, height }. NOT_FOUND for an unknown node; INVALID_ARGUMENT for a node inside an instance, a page, an unreadable file or SVG Figma cannot read.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Node id"
+        },
+        "file": {
+          "type": "string",
+          "minLength": 1,
+          "description": "SVG file (absolute path recommended)"
+        }
+      },
+      "required": [
+        "id",
+        "file"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "uploadText"
+  },
+  {
+    "name": "set_effect_style_effects",
+    "title": "Set effect style effects",
+    "description": "Replaces the whole effects list of a local effect style with shadows (DROP_SHADOW / INNER_SHADOW: color, x, y, radius, spread) and normal blurs (LAYER_BLUR / BACKGROUND_BLUR: radius; progressive blurs are not supported). Each field is a plain value or { variableId } — bound to that variable; variable types are checked before writing (color — COLOR, the rest — FLOAT). Figma effects are immutable, so the list is set as a whole. Returns the style as in get_local_styles. NOT_FOUND for an unknown style or variable; INVALID_ARGUMENT if it is not an effect style or an effect is invalid.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Effect style id"
+        },
+        "effects": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "DROP_SHADOW",
+                      "INNER_SHADOW"
+                    ]
+                  },
+                  "color": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "variableId": {
+                            "type": "string",
+                            "description": "Variable id"
+                          }
+                        },
+                        "required": [
+                          "variableId"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ],
+                    "description": "\"#rrggbb\" / \"#rrggbbaa\" or { variableId } of a COLOR variable"
+                  },
+                  "x": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "$ref": "#/properties/effects/items/anyOf/0/properties/color/anyOf/1"
+                      }
+                    ],
+                    "description": "Offset x in px or { variableId } of a FLOAT variable"
+                  },
+                  "y": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/properties/effects/items/anyOf/0/properties/x/anyOf/0"
+                      },
+                      {
+                        "$ref": "#/properties/effects/items/anyOf/0/properties/color/anyOf/1"
+                      }
+                    ],
+                    "description": "Offset y in px or { variableId }"
+                  },
+                  "radius": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/properties/effects/items/anyOf/0/properties/x/anyOf/0"
+                      },
+                      {
+                        "$ref": "#/properties/effects/items/anyOf/0/properties/color/anyOf/1"
+                      }
+                    ],
+                    "description": "Blur radius in px (>= 0) or { variableId }"
+                  },
+                  "spread": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/properties/effects/items/anyOf/0/properties/x/anyOf/0"
+                      },
+                      {
+                        "$ref": "#/properties/effects/items/anyOf/0/properties/color/anyOf/1"
+                      }
+                    ],
+                    "description": "Spread in px or { variableId }"
+                  },
+                  "visible": {
+                    "type": "boolean",
+                    "description": "Default true"
+                  }
+                },
+                "required": [
+                  "type",
+                  "color",
+                  "x",
+                  "y",
+                  "radius",
+                  "spread"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "LAYER_BLUR",
+                      "BACKGROUND_BLUR"
+                    ]
+                  },
+                  "radius": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/properties/effects/items/anyOf/0/properties/x/anyOf/0"
+                      },
+                      {
+                        "$ref": "#/properties/effects/items/anyOf/0/properties/color/anyOf/1"
+                      }
+                    ],
+                    "description": "Blur radius in Figma units (>= 0; CSS blur() is half of it) or { variableId } of a FLOAT variable"
+                  },
+                  "visible": {
+                    "type": "boolean",
+                    "description": "Default true"
+                  }
+                },
+                "required": [
+                  "type",
+                  "radius"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "description": "Shadows and normal blurs in Figma array order: the LAST one is on top (top of the Figma panel); shadows get blendMode NORMAL, showShadowBehindNode false"
+        }
+      },
+      "required": [
+        "id",
+        "effects"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "set_image_fill",
+    "title": "Set image fill",
+    "description": "Puts an image file (PNG, JPEG or GIF, up to 4096 × 4096 px) into the visible image fill of a node; the fill keeps its scale mode and other settings. Returns { id, name, imageHash, fillIndex }. NOT_FOUND for an unknown node; INVALID_ARGUMENT for a node without a visible image fill, an unreadable file or an image Figma rejects.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Node id"
+        },
+        "file": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Image file (absolute path recommended)"
+        }
+      },
+      "required": [
+        "id",
+        "file"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "uploadBinary",
+    "timeoutMs": 120000
+  },
+  {
+    "name": "set_paint_style_paints",
+    "title": "Set paint style paints",
+    "description": "Replaces the whole paints list of a local paint style: SOLID { color }, GRADIENT_LINEAR { angle, stops }, GRADIENT_RADIAL { center, radius, stops }. Colors are plain or { variableId } — bound to that COLOR variable (solid color or gradient stop). Geometry is given in CSS terms for a square box; the plugin builds gradientTransform. Bindings are read back; if Figma drops one, the style is restored and INVALID_ARGUMENT returned. Returns the style as in get_local_styles. NOT_FOUND for an unknown style or variable.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Paint style id"
+        },
+        "paints": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "SOLID"
+                  },
+                  "color": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "variableId": {
+                            "type": "string",
+                            "description": "Variable id"
+                          }
+                        },
+                        "required": [
+                          "variableId"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ],
+                    "description": "\"#rrggbb\" / \"#rrggbbaa\" or { variableId } of a COLOR variable"
+                  }
+                },
+                "required": [
+                  "type",
+                  "color"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "GRADIENT_LINEAR"
+                  },
+                  "angle": {
+                    "type": "number",
+                    "description": "CSS angle in degrees: 0 — to top, 90 — to right, 180 — to bottom"
+                  },
+                  "stops": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "position": {
+                          "type": "number",
+                          "description": "0..1 along the gradient"
+                        },
+                        "color": {
+                          "$ref": "#/properties/paints/items/anyOf/0/properties/color"
+                        }
+                      },
+                      "required": [
+                        "position",
+                        "color"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 2,
+                    "description": "Color stops in ascending position"
+                  }
+                },
+                "required": [
+                  "type",
+                  "angle",
+                  "stops"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "GRADIENT_RADIAL"
+                  },
+                  "center": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Ellipse center in fractions of the box (0.5, 0.5 — middle)"
+                  },
+                  "radius": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "$ref": "#/properties/paints/items/anyOf/2/properties/center/properties/x"
+                      },
+                      "y": {
+                        "$ref": "#/properties/paints/items/anyOf/2/properties/center/properties/y"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Half-axes in fractions of the box (0.5, 0.5 — touches the edges)"
+                  },
+                  "stops": {
+                    "$ref": "#/properties/paints/items/anyOf/1/properties/stops"
+                  }
+                },
+                "required": [
+                  "type",
+                  "center",
+                  "radius",
+                  "stops"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "description": "Paints in Figma array order: the LAST one is on top (top of the Figma panel), paints[0] at the bottom; visible, opacity 1, blendMode NORMAL"
+        }
+      },
+      "required": [
+        "id",
+        "paints"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "set_session_label",
+    "title": "Set session label",
+    "description": "Sets the label of this Claude session in the session list of the FrontMultitool Bridge plugin (Desktop: the Desktop session title; terminal: a name for the session's task). Does not need the plugin. Returns { port, label, labelSource }.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "description": "Label shown in the plugin"
+        }
+      },
+      "required": [
+        "label"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "label"
+  },
+  {
+    "name": "set_text",
+    "title": "Set text",
+    "description": "Replaces the text of a TEXT node; the fonts of the node are loaded first. Returns { id, name, characters, mixed } — mixed: the old text had several looks (font, size, color, …) and the new one has the look Figma gives it. NOT_FOUND for an unknown node; INVALID_ARGUMENT for a node that is not TEXT or uses a missing font.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "TEXT node id"
+        },
+        "text": {
+          "type": "string",
+          "description": "New text"
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "set_text_style_properties",
+    "title": "Set text style properties",
+    "description": "Sets plain values of a local text style: any of fontName, fontSize, lineHeight, letterSpacing; fields left out are not changed. Returns the style as in get_local_styles. NOT_FOUND for an unknown style; INVALID_ARGUMENT if it is not a text style, the font is not available in Figma or a value is invalid.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Text style id"
+        },
+        "fontName": {
+          "type": "object",
+          "properties": {
+            "family": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Font family, e.g. \"Inter\""
+            },
+            "style": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Font style as the font names it, e.g. \"Regular\", \"Semi Bold\""
+            }
+          },
+          "required": [
+            "family",
+            "style"
+          ],
+          "additionalProperties": false,
+          "description": "Font family + style; must be available in Figma (get_available_fonts)"
+        },
+        "fontSize": {
+          "type": "number",
+          "description": "Font size in px"
+        },
+        "lineHeight": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "unit": {
+                  "type": "string",
+                  "const": "AUTO"
+                }
+              },
+              "required": [
+                "unit"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "unit": {
+                  "type": "string",
+                  "enum": [
+                    "PIXELS",
+                    "PERCENT"
+                  ]
+                },
+                "value": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "unit",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "{ unit: \"AUTO\" } or { unit: \"PIXELS\" | \"PERCENT\", value }"
+        },
+        "letterSpacing": {
+          "type": "object",
+          "properties": {
+            "unit": {
+              "type": "string",
+              "enum": [
+                "PIXELS",
+                "PERCENT"
+              ]
+            },
+            "value": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "unit",
+            "value"
+          ],
+          "additionalProperties": false,
+          "description": "{ unit: \"PIXELS\" | \"PERCENT\", value }"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "set_text_style_variable",
+    "title": "Set text style variable",
+    "description": "Binds a field of a local text style to a variable, or removes the binding with variableId null. fontFamily needs a STRING variable whose value is a font available in Figma with the current font style; fontSize, lineHeight, letterSpacing need FLOAT (pixels). Returns the style as in get_local_styles. NOT_FOUND for an unknown style or variable; INVALID_ARGUMENT for a wrong variable type or a missing font.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Text style id"
+        },
+        "field": {
+          "type": "string",
+          "enum": [
+            "fontFamily",
+            "fontSize",
+            "lineHeight",
+            "letterSpacing"
+          ],
+          "description": "Style field"
+        },
+        "variableId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Variable id, or null to unbind"
+        }
+      },
+      "required": [
+        "id",
+        "field",
+        "variableId"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "set_variable_code_syntax",
+    "title": "Set variable code syntax",
+    "description": "Sets the code syntax of a local variable for one platform (WEB by default) — for WEB the CSS custom property name, e.g. \"--color-primary\". Returns the variable as in get_variable; NOT_FOUND for an unknown variable.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Variable id"
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Code syntax, e.g. \"--color-primary\""
+        },
+        "platform": {
+          "type": "string",
+          "enum": [
+            "WEB",
+            "ANDROID",
+            "iOS"
+          ],
+          "default": "WEB",
+          "description": "Platform, WEB by default"
+        }
+      },
+      "required": [
+        "id",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "set_variable_scopes",
+    "title": "Set variable scopes",
+    "description": "Sets the scopes of a local variable — the fields whose variable pickers in the Figma interface offer it. [] hides it from all pickers; other variables can still alias it and the API can still bind it. ALL_SCOPES cannot be combined with others; scopes must suit the type (FLOAT, STRING, COLOR). Returns the variable as in get_variable. NOT_FOUND for an unknown variable; INVALID_ARGUMENT for a scope that does not apply or if Figma did not keep the scopes.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Variable id"
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "VariableScope values, e.g. [] or [\"ALL_SCOPES\"] or [\"ALL_FILLS\", \"STROKE_COLOR\"]"
+        }
+      },
+      "required": [
+        "id",
+        "scopes"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "set_variable_value",
+    "title": "Set variable value",
+    "description": "Sets the value of a local variable in one mode: a primitive or an alias. Returns the variable as in get_variable. NOT_FOUND for an unknown variable or alias target; INVALID_ARGUMENT if the mode is not in the variable's collection or the value does not match the type.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Variable id"
+        },
+        "modeId": {
+          "type": "string",
+          "description": "Mode id"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "const": "VARIABLE_ALIAS"
+                },
+                "id": {
+                  "type": "string",
+                  "description": "Id of the variable to alias"
+                }
+              },
+              "required": [
+                "type",
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "description": "COLOR: \"#rrggbb\" or \"#rrggbbaa\"; FLOAT: number; STRING: string; BOOLEAN: true/false; or an alias { type: \"VARIABLE_ALIAS\", id } to a variable of the same type"
+        }
+      },
+      "required": [
+        "id",
+        "modeId",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "ungroup_node",
+    "title": "Ungroup node",
+    "description": "Removes a group or frame (figma.ungroup): its children go to its parent at its place. Returns { id, name, type, parentId, lostStyle, children } — lostStyle: the frame had visible fills, strokes or effects, and that look is gone. NOT_FOUND for an unknown node; INVALID_ARGUMENT for a node that is not a group or frame, has no children or is inside an instance.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Group or frame id"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "plain"
+  },
+  {
+    "name": "run_batch",
+    "title": "Run batch of tool calls",
+    "description": "Runs calls of the other figmabridge tools listed in a JSON file, in order, and returns a short summary instead of every result. File: { \"ops\": [{ \"tool\", \"args\", \"saves\"? }] }. saves maps a placeholder to a path in that step's result ({ \"$var:--color-red\": \"id\" }, { \"$mode:Themes/dark\": \"modes[1].id\" }); later args (values and keys) equal to the placeholder get the saved value. Arguments of all steps are checked against their tools before the first call. Stops at the first failing step: error { code, message, step, done, total } — steps before it are applied (no rollback). outFile gets every step's result.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Batch file (absolute path recommended)"
+        },
+        "outFile": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Write the results of all steps to this file"
+        }
+      },
+      "required": [
+        "file"
+      ],
+      "additionalProperties": false
+    },
+    "kind": "batch"
+  }
+]

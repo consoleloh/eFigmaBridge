@@ -1,0 +1,15 @@
+# Зависимости и сборка
+node_modules/
+dist/
+release*/
+
+# Portable Node для локальной разработки (в CI ставится setup-node)
+tools/
+
+# Продукты сборки плагина (CI собирает их заново и синкает в resources)
+packages/figma-plugin/dist/
+resources/figma-plugin/dist/
+
+# Логи и временное
+*.log
+.DS_Store
