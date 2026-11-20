@@ -36,7 +36,7 @@ jobs:
       - name: Build Figma plugin
         run: |
           node build.mjs
-          cp -r dist/* ../../resources/figma-plugin/dist/
+          node -e "require('fs').cpSync('dist', '../../resources/figma-plugin/dist', { recursive: true })"
         working-directory: packages/figma-plugin
 
       - name: Build renderer
