@@ -33,6 +33,9 @@ const targets =
 const result = await builder.build({
   targets,
   config: { directories: { output: path.resolve(output) } },
+  // В CI артефакты забирает upload-artifact; без publish: 'never' electron-builder
+  // пытается публиковать релиз на GitHub и падает без GH_TOKEN
+  publish: 'never',
 });
 
 console.log('Собранные артефакты:');
